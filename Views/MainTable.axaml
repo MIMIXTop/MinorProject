@@ -1,0 +1,121 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MinorProject.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MinorProject.Views.MainTable"
+             x:DataType="vm:MainViewModel">
+
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
+
+        <!-- Главный заголовок -->
+        <TextBlock Text="Нагрузка на подстанцию"
+                   FontSize="28"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,30" />
+
+        <!-- Внешняя рамка (рисует только верхнюю и левую границу) -->
+        <Border BorderBrush="Black" BorderThickness="1,1,0,0" Width="800">
+
+            <!-- Сама сетка таблицы -->
+            <Grid>
+                <!-- Настраиваем высоту строк -->
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="80" /> <!-- Заголовок таблицы -->
+                    <RowDefinition Height="60" /> <!-- Т1 -->
+                    <RowDefinition Height="60" /> <!-- Т2 -->
+                    <RowDefinition Height="60" /> <!-- Выход -->
+                </Grid.RowDefinitions>
+
+                <!-- Настраиваем ширину колонок -->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.2*" /> <!-- Сделали чуть шире для переноса текста -->
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Стили, чтобы не писать одно и то же для каждой ячейки -->
+                <Grid.Styles>
+                    <!-- Стиль рамки ячейки (рисует только нижнюю и правую границу) -->
+                    <Style Selector="Border.cell">
+                        <Setter Property="BorderBrush" Value="Black" />
+                        <Setter Property="BorderThickness" Value="0,0,1,1" />
+                    </Style>
+                    <!-- Стиль текста внутри ячейки -->
+                    <Style Selector="TextBlock.cellText">
+                        <Setter Property="HorizontalAlignment" Value="Center" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                        <Setter Property="TextAlignment" Value="Center" />
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </Grid.Styles>
+
+                <!-- ================= СТРОКА 0: ЗАГОЛОВКИ ================= -->
+                <Border Grid.Row="0" Grid.Column="0" Classes="cell">
+                    <TextBlock Text="Наименование" Classes="cellText" />
+                </Border>
+                <Border Grid.Row="0" Grid.Column="1" Classes="cell">
+                    <TextBlock Text="Напряжение" Classes="cellText" />
+                </Border>
+                <Border Grid.Row="0" Grid.Column="2" Classes="cell">
+                    <!-- Используем &#x0a; для переноса строки -->
+                    <TextBlock Text="Температура&#x0a;масла" Classes="cellText" />
+                </Border>
+                <Border Grid.Row="0" Grid.Column="3" Classes="cell">
+                    <TextBlock Text="Давление" Classes="cellText" />
+                </Border>
+                <Border Grid.Row="0" Grid.Column="4" Classes="cell">
+                    <TextBlock Text="Мощность" Classes="cellText" />
+                </Border>
+
+                <!-- ================= СТРОКА 1: Т1 ================= -->
+                <Border Grid.Row="1" Grid.Column="0" Classes="cell">
+                    <TextBlock Text="Т1" Classes="cellText" />
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Classes="cell">
+                    <TextBlock Text="{Binding T1.Voltage}" Classes="cellText"/>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="2" Classes="cell" >
+                    <TextBlock Text="{Binding T1.OilTemperature}" Classes="cellText"/>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="3" Classes="cell" >
+                    <TextBlock Text="{Binding T1.Pressure}" Classes="cellText"/>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="4" Classes="cell" >
+                    <TextBlock Text="{Binding T1.Power}" Classes="cellText"/>
+                </Border>
+
+                <!-- ================= СТРОКА 2: Т2 ================= -->
+                <Border Grid.Row="2" Grid.Column="0" Classes="cell">
+                    <TextBlock Text="Т2" Classes="cellText" />
+                </Border>
+                <Border Grid.Row="2" Grid.Column="1" Classes="cell">
+                    <TextBlock Text="{Binding T2.Voltage}" Classes="cellText"/>
+                </Border>
+                <Border Grid.Row="2" Grid.Column="2" Classes="cell">
+                    <TextBlock Text="{Binding T2.OilTemperature}" Classes="cellText"/>
+                </Border>
+                <Border Grid.Row="2" Grid.Column="3" Classes="cell">
+                    <TextBlock Text="{Binding T2.Pressure}" Classes="cellText"/>
+                </Border>
+                <Border Grid.Row="2" Grid.Column="4" Classes="cell">
+                    <TextBlock Text="{Binding T2.Power}" Classes="cellText"/>
+                </Border>
+
+                <!-- ================= СТРОКА 3: Выход ================= -->
+                <Border Grid.Row="3" Grid.Column="0" Classes="cell">
+                    <TextBlock Text="Выход" Classes="cellText" />
+                </Border>
+                <Border Grid.Row="3" Grid.Column="1" Classes="cell" />
+                <Border Grid.Row="3" Grid.Column="2" Classes="cell" />
+                <Border Grid.Row="3" Grid.Column="3" Classes="cell" />
+                <Border Grid.Row="3" Grid.Column="4" Classes="cell" />
+
+            </Grid>
+        </Border>
+    </StackPanel>
+
+</UserControl>

@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:MinorProject.Views"
         xmlns:vm="using:MinorProject.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,7 +15,32 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
+    
+    <Window.Styles>
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="14"/>
+            <!-- Убираем стандартный фон выделения -->
+            <Setter Property="Background" Value="Transparent"/> 
+        </Style>
+        <Style Selector="TabItem:selected">
+            <!-- Делаем полоску снизу у активной вкладки -->
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+        </Style>
+    </Window.Styles>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <TabControl Margin="10">
+        <TabItem Header="Главная" FontSize="16">
+            <views:MainTable/>
+        </TabItem>
+        
+        <TabItem Header="Т1" FontSize="16">
+            <TextBlock Text="Страница Т1 в разработке..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </TabItem>
+        
+        <TabItem Header="Т2" FontSize="16">
+            <TextBlock Text="Страница Т2 в разработке..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </TabItem>
+    </TabControl>
 
 </Window>
