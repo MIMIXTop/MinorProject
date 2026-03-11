@@ -96,13 +96,60 @@
                 <Button Classes="situation" Command="{Binding FanFailureCommand}">
                     <TextBlock Text="Выход из строя&#x0a;вентилятора" TextAlignment="Center"/>
                 </Button>
+                
+                <Button
+                    Command="{Binding DoRandomChangeCommand}"
+                    Content="Change value"/>
             </StackPanel>
             
             <Grid Grid.Column="2" RowDefinitions="*, 20, *">
                 
                 <!-- Заглушка для Графика 3 (Верхний правый) -->
                 <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1">
-                    <TextBlock Text="[ Место для Графика 3 ]" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"/>
+                    <avalonia:PieChart
+                        Grid.Row="1"
+                        InitialRotation="-225"
+                        MaxAngle="270"
+                        MinValue="0"
+                        MaxValue="100">
+
+                        <avalonia:PieChart.Series>
+
+                            <avalonia:XamlAngularGaugeSeries
+                                GaugeValue="60"
+                                OuterRadiusOffset="130"
+                                MaxRadialColumnWidth="20"
+                                CornerRadius="0"/>
+
+                            <avalonia:XamlAngularGaugeSeries
+                                GaugeValue="30"
+                                OuterRadiusOffset="130"
+                                MaxRadialColumnWidth="20"
+                                CornerRadius="0"/>
+
+                            <avalonia:XamlAngularGaugeSeries
+                                GaugeValue="10"
+                                OuterRadiusOffset="130"
+                                MaxRadialColumnWidth="20"
+                                CornerRadius="0"/>
+
+                        </avalonia:PieChart.Series>
+
+                        <avalonia:PieChart.VisualElements>
+
+                            <avalonia:XamlNeedle
+                                Width="20"
+                                Value="{Binding Value}"/>
+
+                            <avalonia:XamlAngularTicks
+                                LabelsSize="16"
+                                LabelsOuterOffset="15"
+                                OuterOffset="65"
+                                TicksLength="20" />
+
+                        </avalonia:PieChart.VisualElements>
+
+                    </avalonia:PieChart>
                 </Border>
 
                 <!-- Заглушка для Графика 4 (Нижний правый) -->

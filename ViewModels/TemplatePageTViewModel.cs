@@ -66,6 +66,23 @@ public partial class TemplatePageTViewModel : ObservableObject
     [ObservableProperty]
     private string _chartTitle2 = "График Т1: температура масла (°C)";
 
+    private readonly Random _random = new();
+
+    [ObservableProperty]
+    private double _value = 52;
+
+    public Func<double, string> Labeler { get; set; } =
+        value => value.ToString("N1");
+
+    [RelayCommand]
+    public void DoRandomChange()
+    {
+        Value = _random.Next(0, 100);
+
+        Console.WriteLine(Value);
+        
+    }
+    
     public TemplatePageTViewModel()
     {
         _chart1Values = new ObservableCollection<ObservableValue>();
