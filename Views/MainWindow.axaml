@@ -11,36 +11,51 @@
         Title="MinorProject">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-    
+
     <Window.Styles>
         <Style Selector="TabItem">
             <Setter Property="FontSize" Value="14"/>
-            <!-- Убираем стандартный фон выделения -->
-            <Setter Property="Background" Value="Transparent"/> 
-        </Style>
-        <Style Selector="TabItem:selected">
-            <!-- Делаем полоску снизу у активной вкладки -->
-            <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="Background" Value="Transparent"/>
         </Style>
     </Window.Styles>
 
-    <TabControl Margin="10">
-        <TabItem Header="Главная" FontSize="16">
-            <views:MainTable DataContext="{Binding TableVm}"/>
-        </TabItem>
-        
-        <TabItem Header="Т1" FontSize="16">
-            <views:TemplatePageT DataContext="{Binding InfoT1Vm}"/>
-        </TabItem>
-        
-        <TabItem Header="Т2" FontSize="16">
-            <TextBlock Text="Страница Т2 в разработке..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </TabItem>
-    </TabControl>
+    <Grid RowDefinitions="Auto, *">
+        <!-- Верхняя панель -->
+        <Border Grid.Row="0" Padding="10,6" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}">
+            <DockPanel>
+                <Button DockPanel.Dock="Right"
+                        Command="{Binding ToggleThemeCommand}"
+                        Content="{Binding ThemeIcon}"
+                        FontSize="18"
+                        Padding="8,4"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        ToolTip.Tip="Сменить тему"
+                        Background="Transparent"
+                        BorderThickness="0"/>
+                <TextBlock Text="Цифровой двойник подстанции"
+                           FontSize="16" FontWeight="SemiBold"
+                           VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Вкладки -->
+        <TabControl Grid.Row="1" Margin="10">
+            <TabItem Header="Главная" FontSize="16">
+                <views:MainTable DataContext="{Binding TableVm}"/>
+            </TabItem>
+
+            <TabItem Header="Т1" FontSize="16">
+                <views:TemplatePageT DataContext="{Binding InfoT1Vm}"/>
+            </TabItem>
+
+            <TabItem Header="Т2" FontSize="16">
+                <views:TemplatePageT DataContext="{Binding InfoT2Vm}"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
 
 </Window>
