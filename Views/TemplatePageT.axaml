@@ -5,173 +5,297 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
-             x:Class="MinorProject.Views.TemplatePageT" 
+             x:Class="MinorProject.Views.TemplatePageT"
              x:DataType="vm:TemplatePageTViewModel">
-    
+
+    <UserControl.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+        <Style Selector="Button.situation">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </UserControl.Styles>
+
     <Grid RowDefinitions="Auto, *">
         <TextBlock Grid.Row="0"
-                   Text="Информация"
+                   Text="{Binding Twin.Name, StringFormat='Цифровой двойник {0}'}"
                    FontSize="28"
                    HorizontalAlignment="Center"
                    Margin="0,0,0,20"/>
-        
-        <Grid Grid.Row="1" ColumnDefinitions="4*, Auto, 3*">
-            
-            <!-- ЛЕВАЯ ЧАСТЬ: ГРАФИКИ -->
-            <Grid Grid.Column="0" RowDefinitions="*, 20, *">
-                
-                <!-- График 1: Мощность -->
-                <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Background="White">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="{Binding ChartTitle1}"
-                                   HorizontalAlignment="Center"
-                                   Margin="5" FontSize="14"
-                                   Foreground="Black"/>
-                        <avalonia:CartesianChart Grid.Row="1"
-                            Series="{Binding Chart1Series}" 
-                            YAxes="{Binding Chart1YAxes}"
-                            TooltipPosition="Hidden" 
-                            Margin="10"
-                            VerticalAlignment="Stretch"
-                            HorizontalAlignment="Stretch" />
+
+        <TabControl Grid.Row="1">
+            <!-- ВКЛАДКА 1: МОНИТОРИНГ -->
+            <TabItem Header="Мониторинг">
+                <Grid ColumnDefinitions="4*, Auto, 3*">
+
+                    <!-- ЛЕВАЯ ЧАСТЬ: ГРАФИКИ -->
+                    <Grid Grid.Column="0" RowDefinitions="*, 20, *">
+
+                        <!-- График 1: Мощность -->
+                        <Border Grid.Row="0" Classes="card">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="{Binding ChartTitle1}"
+                                           HorizontalAlignment="Center"
+                                           Margin="5" FontSize="14"/>
+                                <avalonia:CartesianChart Grid.Row="1"
+                                    Series="{Binding Chart1Series}"
+                                    YAxes="{Binding Chart1YAxes}"
+                                    TooltipPosition="Hidden"
+                                    Margin="10"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalAlignment="Stretch" />
+                            </Grid>
+                        </Border>
+
+                        <!-- График 2: Температура -->
+                        <Border Grid.Row="2" Classes="card">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="{Binding ChartTitle2}"
+                                           HorizontalAlignment="Center"
+                                           Margin="5" FontSize="14"/>
+                                <avalonia:CartesianChart Grid.Row="1"
+                                    Series="{Binding Chart2Series}"
+                                    YAxes="{Binding Chart2YAxes}"
+                                    TooltipPosition="Hidden"
+                                    Margin="10"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalAlignment="Stretch" />
+                            </Grid>
+                        </Border>
                     </Grid>
-                </Border>
 
-                <!-- График 2: Температура -->
-                <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Background="White">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="{Binding ChartTitle2}"
-                                   HorizontalAlignment="Center"
-                                   Margin="5" FontSize="14"
-                                   Foreground="Black"/>
-                        <avalonia:CartesianChart Grid.Row="1"
-                            Series="{Binding Chart2Series}"
-                            YAxes="{Binding Chart2YAxes}"
-                            TooltipPosition="Hidden" 
-                            Margin="10"
-                            VerticalAlignment="Stretch"
-                            HorizontalAlignment="Stretch" />
+                    <!-- СРЕДНЯЯ ЧАСТЬ: ПАНЕЛЬ УПРАВЛЕНИЯ -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="30,0">
+                        <TextBlock Text="Ситуации" HorizontalAlignment="Center" Margin="0,0,0,15" FontSize="16" FontWeight="Bold"/>
+
+                        <Border Classes="card">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,5">
+                                    <TextBlock Text="Задание мощности (МВА)" HorizontalAlignment="Center" FontWeight="SemiBold"/>
+                                    <CheckBox Content="Ручной режим"
+                                              IsChecked="{Binding IsManualMode}"
+                                              HorizontalAlignment="Right"
+                                              FontSize="12"/>
+                                </Grid>
+                                <Slider Minimum="0" Maximum="80"
+                                        Value="{Binding OperatorPower}"
+                                        TickFrequency="1"
+                                        IsSnapToTickEnabled="True"
+                                        Margin="5,0"/>
+                                <TextBlock Text="{Binding OperatorPower, StringFormat='{}{0} МВА'}"
+                                           HorizontalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="DodgerBlue"/>
+                                <TextBlock Text="{Binding AllocatedPower, StringFormat='Выделено балансировщиком: {0:F1} МВА'}"
+                                           HorizontalAlignment="Center"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                           Margin="0,4,0,0"
+                                           IsVisible="{Binding !IsManualMode}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button Classes="situation" Content="Вкл/выкл (Системы)" Command="{Binding ToggleSystemCommand}"/>
+
+                        <Button Classes="situation" Command="{Binding ShortCircuitCommand}">
+                            <TextBlock Text="КЗ (Трансформатор,&#x0a;потребители)" TextAlignment="Center"/>
+                        </Button>
+
+                        <Button Classes="situation" Command="{Binding LeakCommand}">
+                            <TextBlock Text="Протечка системы&#x0a;охлаждения" TextAlignment="Center"/>
+                        </Button>
+
+                        <Button Classes="situation" Command="{Binding FanFailureCommand}">
+                            <TextBlock Text="Выход из строя&#x0a;вентилятора" TextAlignment="Center"/>
+                        </Button>
+
+                        <Button Classes="situation" Command="{Binding RepairCommand}">
+                            <TextBlock Text="Починка / Сброс аварий" TextAlignment="Center" FontWeight="Bold" Foreground="LimeGreen"/>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- ПРАВАЯ ЧАСТЬ: ИНФОРМАЦИЯ -->
+                    <Grid Grid.Column="2" RowDefinitions="Auto, 20, Auto, *">
+
+                        <Border Grid.Row="0" Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Состояние оборудования" FontWeight="Bold" FontSize="16" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding SystemStatusText}"
+                                           TextWrapping="Wrap"
+                                           FontWeight="Bold"
+                                           FontSize="16"
+                                           Foreground="IndianRed"
+                                           Margin="0,0,0,10"/>
+                                <TextBlock Text="{Binding CoolingStatusText}"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           Foreground="DodgerBlue"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="2" Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Текущие параметры (Датчики)" FontWeight="Bold" FontSize="16" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                                <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, 10, Auto, 10, Auto, 10, Auto">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Мощность:" FontSize="15"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentPower, StringFormat='{}{0:F1} МВА'}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Температура:" FontSize="15"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding OilTemperatureText}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Напряжение НН:" FontSize="15"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VoltageText}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Давление масла:" FontSize="15"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding PressureText}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </Grid>
-                </Border>
-            </Grid>
-            
-            <!-- СРЕДНЯЯ ЧАСТЬ: ПАНЕЛЬ УПРАВЛЕНИЯ (СИТУАЦИИ) -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="30,0">
-                <TextBlock Text="Ситуации" HorizontalAlignment="Center" Margin="0,0,0,15" FontSize="16" FontWeight="Bold"/>
-                
-                <Border BorderBrush="Black" BorderThickness="1" Background="#F5F5F5" Padding="10" Margin="0,0,0,15">
-                    <StackPanel>
-                        <TextBlock Text="Задание мощности (МВА)" HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        
-                        <!-- Сам ползунок. Максимум 80, чтобы можно было проверить аварийное отключение (>63) -->
-                        <Slider Minimum="0" Maximum="80" 
-                                Value="{Binding OperatorPower}" 
-                                TickFrequency="1" 
-                                IsSnapToTickEnabled="True" 
-                                Margin="5,0"/>
-                        
-                        <!-- Текст, показывающий сколько накрутили на ползунке -->
-                        <TextBlock Text="{Binding OperatorPower, StringFormat='{}{0} МВА'}" 
-                                   HorizontalAlignment="Center" 
-                                   FontWeight="Bold" 
-                                   Foreground="DarkBlue"/>
-                    </StackPanel>
-                </Border>
-                
-                <StackPanel.Styles>
-                    <Style Selector="Button.situation">
-                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                        <Setter Property="Background" Value="#F5F5F5"/>
-                        <Setter Property="BorderBrush" Value="Black"/>
-                        <Setter Property="BorderThickness" Value="1"/>
-                        <Setter Property="Margin" Value="0,0,0,15"/>
-                        <Setter Property="Padding" Value="15,10"/>
-                        <Setter Property="CornerRadius" Value="0"/> 
-                        <Setter Property="Cursor" Value="Hand"/>
-                    </Style>
-                    <Style Selector="Button.situation:pointerover /template/ ContentPresenter">
-                        <Setter Property="Background" Value="#E0E0E0"/>
-                    </Style>
-                </StackPanel.Styles>
-                
-                <Button Classes="situation" Content="Вкл/выкл (Системы)" Command="{Binding ToggleSystemCommand}"/>
-                
-                <Button Classes="situation" Command="{Binding ShortCircuitCommand}">
-                    <TextBlock Text="КЗ (Трансформатор,&#x0a;потребители)" TextAlignment="Center"/>
-                </Button>
-                
-                <Button Classes="situation" Command="{Binding LeakCommand}">
-                    <TextBlock Text="Протечка системы&#x0a;охлаждения" TextAlignment="Center"/>
-                </Button>
-                
-                <Button Classes="situation" Command="{Binding FanFailureCommand}">
-                    <TextBlock Text="Выход из строя&#x0a;вентилятора" TextAlignment="Center"/>
-                </Button>
 
-                <Button Classes="situation" Command="{Binding RepairCommand}">
-                    <TextBlock Text="Починка / Сброс аварий" TextAlignment="Center" FontWeight="Bold" Foreground="DarkGreen"/>
-                </Button>
-            </StackPanel>
-            
-            <!-- ПРАВАЯ ЧАСТЬ: ПАНЕЛЬ "ИНФОРМАЦИЯ" (ПО МЕТОДИЧКЕ) -->
-            <Grid Grid.Column="2" RowDefinitions="Auto, 20, Auto, *">
-                
-                <!-- Блок 1: Состояние системы и охлаждения -->
-                <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Background="#FAFAFA" Padding="15">
-                    <StackPanel>
-                        <TextBlock Text="Состояние оборудования" FontWeight="Bold" FontSize="16" Margin="0,0,0,15" HorizontalAlignment="Center"/>
-                        
-                        <!-- Статус (Авария или Норма) -->
-                        <TextBlock Text="{Binding SystemStatusText}" 
-                                   TextWrapping="Wrap" 
-                                   FontWeight="Bold" 
-                                   FontSize="16" 
-                                   Foreground="DarkRed" 
-                                   Margin="0,0,0,10"/>
-                        
-                        <!-- Статус Охлаждения -->
-                        <TextBlock Text="{Binding CoolingStatusText}" 
-                                   FontSize="15" 
-                                   FontWeight="SemiBold"
-                                   Foreground="DarkBlue"/>
-                    </StackPanel>
-                </Border>
+                </Grid>
+            </TabItem>
 
-                <!-- Блок 2: Точные показания датчиков -->
-                <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Background="#FAFAFA" Padding="15">
-                    <StackPanel>
-                        <TextBlock Text="Текущие параметры (Датчики)" FontWeight="Bold" FontSize="16" Margin="0,0,0,15" HorizontalAlignment="Center"/>
-                        
-                        <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, 10, Auto, 10, Auto, 10, Auto">
-                            <!-- Мощность -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Мощность:" FontSize="15"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentPower, StringFormat='{}{0:F1} МВА'}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
-                            
-                            <!-- Температура -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Температура:" FontSize="15"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding OilTemperatureText}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
-                            
-                            <!-- Напряжение -->
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Напряжение НН:" FontSize="15"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VoltageText}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
-                            
-                            <!-- Давление -->
-                            <TextBlock Grid.Row="6" Grid.Column="0" Text="Давление масла:" FontSize="15"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding PressureText}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
-                        </Grid>
+            <!-- ВКЛАДКА 2: ИСТОРИЯ -->
+            <TabItem Header="История">
+                <Grid RowDefinitions="Auto, *, Auto">
+                    <TextBlock Grid.Row="0" Text="История данных (последние 100 записей)"
+                               FontSize="18" FontWeight="Bold"
+                               HorizontalAlignment="Center" Margin="10"/>
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding HistoryData}"
+                              AutoGenerateColumns="False"
+                              CanUserSortColumns="True"
+                              CanUserResizeColumns="True"
+                              GridLinesVisibility="All"
+                              HorizontalGridLinesBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                              VerticalGridLinesBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                              Margin="10">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Время" Binding="{Binding Timestamp, StringFormat='{}{0:HH:mm:ss.fff}'}" Width="120"/>
+                            <DataGridTextColumn Header="Мощность (МВА)" Binding="{Binding Power, StringFormat='{}{0:F2}'}" Width="120"/>
+                            <DataGridTextColumn Header="Температура (°C)" Binding="{Binding OilTemperature, StringFormat='{}{0:F1}'}" Width="120"/>
+                            <DataGridTextColumn Header="Напряжение (В)" Binding="{Binding Voltage, StringFormat='{}{0:F1}'}" Width="120"/>
+                            <DataGridTextColumn Header="Давление (атм)" Binding="{Binding Pressure, StringFormat='{}{0:F1}'}" Width="120"/>
+                            <DataGridTextColumn Header="Состояние" Binding="{Binding SystemState}" Width="100"/>
+                            <DataGridTextColumn Header="Охлаждение" Binding="{Binding CoolingState}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                        <Button Content="Экспорт в CSV"
+                                Command="{Binding ExportHistoryCommand}"
+                                Padding="20,10"
+                                Margin="10"
+                                Background="#4CAF50"
+                                Foreground="White"
+                                FontWeight="Bold"
+                                CornerRadius="4"/>
                     </StackPanel>
-                </Border>
-            </Grid>
-            
-        </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ВКЛАДКА 3: НАСТРОЙКИ -->
+            <TabItem Header="Настройки">
+                <ScrollViewer>
+                    <StackPanel Margin="20" MaxWidth="600" HorizontalAlignment="Center">
+                        <TextBlock Text="Параметры эмуляции" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                        <TextBlock Text="{Binding EditSettingsError}" FontSize="14" FontWeight="Bold"
+                                   Foreground="IndianRed" TextWrapping="Wrap" HorizontalAlignment="Center" Margin="0,0,0,5"
+                                   IsVisible="{Binding EditSettingsError, Converter={x:Static vm:StringNotEmptyConverter.Instance}}"/>
+                        <TextBlock Text="{Binding EditSettingsSuccess}" FontSize="14" FontWeight="Bold"
+                                   Foreground="LimeGreen" HorizontalAlignment="Center" Margin="0,0,0,5"
+                                   IsVisible="{Binding EditSettingsSuccess, Converter={x:Static vm:StringNotEmptyConverter.Instance}}"/>
+
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Параметры обновления" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                                <Grid ColumnDefinitions="220, 120" RowDefinitions="Auto, 10, Auto">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Интервал обновления (мс):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditUpdateIntervalMs}" FontSize="14"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Максимальная мощность (МВА):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EditMaxPower}" FontSize="14"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Параметры защиты" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                                <Grid ColumnDefinitions="220, 120" RowDefinitions="Auto, 10, Auto">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Порог мощности (МВА):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditPowerEmergencyThreshold}" FontSize="14"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Порог температуры (°C):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EditTemperatureEmergencyThreshold}" FontSize="14"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Параметры охлаждения" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                                <Grid ColumnDefinitions="220, 120" RowDefinitions="Auto, 10, Auto, 10, Auto, 10, Auto">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Вкл. насос (°C):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditPumpOnTemperature}" FontSize="14"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Выкл. насос (°C):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EditPumpOffTemperature}" FontSize="14"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Вкл. вентилятор (°C):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EditFanOnTemperature}" FontSize="14"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Выкл. вентилятор (°C):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding EditFanOffTemperature}" FontSize="14"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Коэффициенты" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                                <Grid ColumnDefinitions="220, 120" RowDefinitions="Auto, 10, Auto, 10, Auto">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Коэффициент нагрева:" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditHeatingCoefficient}" FontSize="14"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Эффект насоса (°C):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EditPumpCoolingEffect}" FontSize="14"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Эффект вентилятора (°C):" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EditFanCoolingEffect}" FontSize="14"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                            <Button Content="Сохранить конфигурацию"
+                                    Command="{Binding SaveConfigCommand}"
+                                    Padding="20,10" Margin="10"
+                                    Background="#2196F3" Foreground="White"
+                                    FontWeight="Bold" CornerRadius="4"/>
+                            <Button Content="Сбросить по умолчанию"
+                                    Command="{Binding ResetConfigCommand}"
+                                    Padding="20,10" Margin="10"
+                                    Background="#FF9800" Foreground="White"
+                                    FontWeight="Bold" CornerRadius="4"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Файлы данных сохраняются в папку Data проекта"
+                                   FontSize="12" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                   HorizontalAlignment="Center" Margin="0,20,0,0"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

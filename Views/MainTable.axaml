@@ -3,113 +3,254 @@
              xmlns:vm="clr-namespace:MinorProject.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
              x:Class="MinorProject.Views.MainTable"
              x:DataType="vm:MainViewModel">
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
+    <ScrollViewer>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="20">
 
-        <!-- Главный заголовок -->
-        <TextBlock Text="Нагрузка на подстанцию"
-                   FontSize="28"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,30" />
+            <TextBlock Text="Нагрузка на подстанцию"
+                       FontSize="28"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,20" />
 
-        <Border BorderBrush="Black" BorderThickness="1" Width="850">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="70" /> <!-- Заголовок таблицы -->
-                    <RowDefinition Height="60" /> <!-- Т1 -->
-                    <RowDefinition Height="60" /> <!-- Т2 -->
-                    <RowDefinition Height="60" /> <!-- Выход -->
-                </Grid.RowDefinitions>
+            <!-- === ПАНЕЛЬ УПРАВЛЕНИЯ БАЛАНСИРОВКОЙ === -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1" CornerRadius="6"
+                    Padding="20" Margin="0,0,0,20" Width="900"
+                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                <StackPanel>
+                    <Grid>
+                        <TextBlock Text="Управление нагрузкой" FontSize="18" FontWeight="Bold" />
+                        <CheckBox Content="Автоматическая балансировка"
+                                  IsChecked="{Binding IsAutoBalancing}"
+                                  HorizontalAlignment="Right"
+                                  FontSize="14" FontWeight="SemiBold" />
+                    </Grid>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="1.2*" /> 
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+                    <!-- Слайдер общей мощности -->
+                    <TextBlock Text="Общая потребляемая мощность (МВА)"
+                               Margin="0,15,0,5" FontSize="14" />
+                    <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,5">
+                        <Slider Minimum="0" Maximum="{Binding MaxTotalDemand}"
+                                Value="{Binding TotalDemand}"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                Margin="0,0,10,0" />
+                        <TextBlock Text="{Binding TotalDemand, StringFormat='{}{0:F0} МВА'}"
+                                   FontSize="18" FontWeight="Bold" Foreground="DodgerBlue"
+                                   VerticalAlignment="Center" Width="80" />
+                    </Grid>
 
-                <Grid.Styles>
-                    <Style Selector="Border.cell">
-                        <Setter Property="BorderBrush" Value="Black" />
-                        <Setter Property="BorderThickness" Value="1" />
-                    </Style>
-                    <Style Selector="TextBlock.cellText">
-                        <Setter Property="HorizontalAlignment" Value="Center" />
-                        <Setter Property="VerticalAlignment" Value="Center" />
-                        <Setter Property="TextAlignment" Value="Center" />
-                        <Setter Property="FontSize" Value="15" />
-                    </Style>
-                </Grid.Styles>
+                    <!-- Распределение -->
+                    <TextBlock Text="{Binding DistributionText}" FontSize="13" Margin="0,5,0,3" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Т1: " FontSize="14" />
+                        <TextBlock Text="{Binding T1AllocatedText}" FontSize="14" FontWeight="Bold"
+                                   Foreground="DodgerBlue" />
+                        <TextBlock Text="  |  Т2: " FontSize="14" Margin="15,0,0,0" />
+                        <TextBlock Text="{Binding T2AllocatedText}" FontSize="14" FontWeight="Bold"
+                                   Foreground="OrangeRed" />
+                    </StackPanel>
 
-                <!-- ================= СТРОКА 0: ЗАГОЛОВКИ ================= -->
-                <!-- Обратите внимание: добавлен Background="#E8E8E8" для шапки -->
-                <Border Grid.Row="0" Grid.Column="0" Classes="cell" Background="#E8E8E8">
-                    <TextBlock Text="Наименование" Classes="cellText" FontWeight="Bold"/>
-                </Border>
-                <Border Grid.Row="0" Grid.Column="1" Classes="cell" Background="#E8E8E8">
-                    <TextBlock Text="Напряжение" Classes="cellText" FontWeight="Bold"/>
-                </Border>
-                <Border Grid.Row="0" Grid.Column="2" Classes="cell" Background="#E8E8E8">
-                    <TextBlock Text="Температура&#x0a;масла" Classes="cellText" FontWeight="Bold"/>
-                </Border>
-                <Border Grid.Row="0" Grid.Column="3" Classes="cell" Background="#E8E8E8">
-                    <TextBlock Text="Давление" Classes="cellText" FontWeight="Bold"/>
-                </Border>
-                <Border Grid.Row="0" Grid.Column="4" Classes="cell" Background="#E8E8E8">
-                    <TextBlock Text="Мощность" Classes="cellText" FontWeight="Bold"/>
-                </Border>
+                    <!-- Предупреждение failover -->
+                    <TextBlock Text="{Binding FailoverWarning}"
+                               FontSize="14" FontWeight="Bold" Foreground="IndianRed"
+                               Margin="0,8,0,0" TextWrapping="Wrap"
+                               IsVisible="{Binding FailoverWarning, Converter={x:Static vm:StringNotEmptyConverter.Instance}}" />
+                </StackPanel>
+            </Border>
 
-                <!-- ================= СТРОКА 1: Т1 ================= -->
-                <Border Grid.Row="1" Grid.Column="0" Classes="cell">
-                    <TextBlock Text="Т1" Classes="cellText" FontWeight="SemiBold"/>
-                </Border>
-                <Border Grid.Row="1" Grid.Column="1" Classes="cell">
-                    <TextBlock Text="{Binding T1.Voltage}" Classes="cellText"/>
-                </Border>
-                <Border Grid.Row="1" Grid.Column="2" Classes="cell" >
-                    <TextBlock Text="{Binding T1.OilTemperature}" Classes="cellText"/>
-                </Border>
-                <Border Grid.Row="1" Grid.Column="3" Classes="cell" >
-                    <TextBlock Text="{Binding T1.Pressure}" Classes="cellText"/>
-                </Border>
-                <Border Grid.Row="1" Grid.Column="4" Classes="cell" >
-                    <TextBlock Text="{Binding T1.Power}" Classes="cellText"/>
-                </Border>
+            <!-- === НАСТРОЙКИ БАЛАНСИРОВЩИКА === -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1" CornerRadius="6"
+                    Padding="20" Margin="0,0,0,20" Width="900"
+                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                <StackPanel>
+                    <TextBlock Text="Настройки распределения" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" />
 
-                <!-- ================= СТРОКА 2: Т2 ================= -->
-                <Border Grid.Row="2" Grid.Column="0" Classes="cell">
-                    <TextBlock Text="Т2" Classes="cellText" FontWeight="SemiBold"/>
-                </Border>
-                <Border Grid.Row="2" Grid.Column="1" Classes="cell">
-                    <TextBlock Text="{Binding T2.Voltage}" Classes="cellText"/>
-                </Border>
-                <Border Grid.Row="2" Grid.Column="2" Classes="cell">
-                    <TextBlock Text="{Binding T2.OilTemperature}" Classes="cellText"/>
-                </Border>
-                <Border Grid.Row="2" Grid.Column="3" Classes="cell">
-                    <TextBlock Text="{Binding T2.Pressure}" Classes="cellText"/>
-                </Border>
-                <Border Grid.Row="2" Grid.Column="4" Classes="cell">
-                    <TextBlock Text="{Binding T2.Power}" Classes="cellText"/>
-                </Border>
+                    <!-- Стратегия -->
+                    <TextBlock Text="Стратегия распределения" FontSize="13" Margin="0,0,0,5" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Button Content="Т1 → Т2 (приоритет Т1)"
+                                Command="{Binding SetStrategyT1FirstCommand}"
+                                Padding="12,6" Margin="0,0,8,0" FontSize="12" CornerRadius="4"
+                                Background="{DynamicResource SystemControlHighlightAccentBrush}"
+                                Foreground="White" />
+                        <Button Content="Т2 → Т1 (приоритет Т2)"
+                                Command="{Binding SetStrategyT2FirstCommand}"
+                                Padding="12,6" Margin="0,0,8,0" FontSize="12" CornerRadius="4" />
+                        <Button Content="Пропорционально"
+                                Command="{Binding SetStrategyProportionalCommand}"
+                                Padding="12,6" FontSize="12" CornerRadius="4" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding StrategyText}" FontSize="13" FontWeight="SemiBold"
+                               Foreground="DodgerBlue" Margin="0,0,0,10" />
 
-                <!-- ================= СТРОКА 3: Выход ================= -->
-                <Border Grid.Row="3" Grid.Column="0" Classes="cell" Background="#F9F9F9">
-                    <TextBlock Text="Выход" Classes="cellText" FontWeight="SemiBold"/>
-                </Border>
-                <Border Grid.Row="3" Grid.Column="1" Classes="cell" Background="#F9F9F9"/>
-                <Border Grid.Row="3" Grid.Column="2" Classes="cell" Background="#F9F9F9"/>
-                <Border Grid.Row="3" Grid.Column="3" Classes="cell" Background="#F9F9F9"/>
-                <!-- Ячейка "Мощность на выходе" (Если в MainViewModel есть свойство TotalPower) -->
-                <Border Grid.Row="3" Grid.Column="4" Classes="cell" Background="#F9F9F9">
-                     <TextBlock Text="—" Classes="cellText" Foreground="Gray"/>
-                </Border>
+                    <!-- Ошибки/успех -->
+                    <TextBlock Text="{Binding BalancerSettingsError}" FontSize="13" FontWeight="Bold"
+                               Foreground="IndianRed" Margin="0,0,0,5"
+                               IsVisible="{Binding BalancerSettingsError, Converter={x:Static vm:StringNotEmptyConverter.Instance}}" />
+                    <TextBlock Text="{Binding BalancerSettingsSuccess}" FontSize="13" FontWeight="Bold"
+                               Foreground="LimeGreen" Margin="0,0,0,5"
+                               IsVisible="{Binding BalancerSettingsSuccess, Converter={x:Static vm:StringNotEmptyConverter.Instance}}" />
 
-            </Grid>
-        </Border>
-    </StackPanel>
+                    <!-- Параметры -->
+                    <Grid ColumnDefinitions="240, 100, 30, 240, 100" RowDefinitions="Auto, 10, Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Лимит Т1 в балансировщике (МВА):"
+                                   VerticalAlignment="Center" FontSize="13" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditBalancerMaxT1}" FontSize="13" />
+
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Лимит Т2 в балансировщике (МВА):"
+                                   VerticalAlignment="Center" FontSize="13" />
+                        <TextBox Grid.Row="0" Grid.Column="4" Text="{Binding EditBalancerMaxT2}" FontSize="13" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Порог подключения Т2 (МВА):"
+                                   VerticalAlignment="Center" FontSize="13" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EditT2Threshold}" FontSize="13" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="3" Text="Макс. потребление (МВА):"
+                                   VerticalAlignment="Center" FontSize="13" />
+                        <TextBox Grid.Row="2" Grid.Column="4" Text="{Binding EditMaxTotalDemand}" FontSize="13" />
+                    </Grid>
+
+                    <Button Content="Применить настройки"
+                            Command="{Binding ApplyBalancerSettingsCommand}"
+                            Padding="16,8" Margin="0,12,0,0"
+                            HorizontalAlignment="Left" CornerRadius="4"
+                            Background="#2196F3" Foreground="White" FontWeight="SemiBold" />
+                </StackPanel>
+            </Border>
+
+            <!-- === ТАБЛИЦА ПОКАЗАНИЙ === -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1" CornerRadius="4" Width="900">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70" />
+                        <RowDefinition Height="60" />
+                        <RowDefinition Height="60" />
+                        <RowDefinition Height="60" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="1.2*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.Styles>
+                        <Style Selector="Border.cell">
+                            <Setter Property="BorderBrush"
+                                    Value="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                        </Style>
+                        <Style Selector="TextBlock.cellText">
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="TextAlignment" Value="Center" />
+                            <Setter Property="FontSize" Value="15" />
+                        </Style>
+                    </Grid.Styles>
+
+                    <!-- ЗАГОЛОВКИ -->
+                    <Border Grid.Row="0" Grid.Column="0" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                        <TextBlock Text="Наименование" Classes="cellText" FontWeight="Bold" />
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="1" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                        <TextBlock Text="Статус" Classes="cellText" FontWeight="Bold" />
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="2" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                        <TextBlock Text="Напряжение" Classes="cellText" FontWeight="Bold" />
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="3" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                        <TextBlock Text="Температура&#x0a;масла" Classes="cellText" FontWeight="Bold" />
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="4" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                        <TextBlock Text="Давление" Classes="cellText" FontWeight="Bold" />
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="5" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                        <TextBlock Text="Мощность" Classes="cellText" FontWeight="Bold" />
+                    </Border>
+
+                    <!-- Т1 -->
+                    <Border Grid.Row="1" Grid.Column="0" Classes="cell">
+                        <TextBlock Text="Т1" Classes="cellText" FontWeight="SemiBold" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="1" Classes="cell">
+                        <TextBlock Text="{Binding T1StatusIcon}" FontSize="20"
+                                   Foreground="{Binding T1StatusBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="2" Classes="cell">
+                        <TextBlock Text="{Binding T1.Voltage}" Classes="cellText" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="3" Classes="cell">
+                        <TextBlock Text="{Binding T1.OilTemperature}" Classes="cellText" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="4" Classes="cell">
+                        <TextBlock Text="{Binding T1.Pressure}" Classes="cellText" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="5" Classes="cell">
+                        <TextBlock Text="{Binding T1.Power}" Classes="cellText" />
+                    </Border>
+
+                    <!-- Т2 -->
+                    <Border Grid.Row="2" Grid.Column="0" Classes="cell">
+                        <TextBlock Text="Т2" Classes="cellText" FontWeight="SemiBold" />
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="1" Classes="cell">
+                        <TextBlock Text="{Binding T2StatusIcon}" FontSize="20"
+                                   Foreground="{Binding T2StatusBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="2" Classes="cell">
+                        <TextBlock Text="{Binding T2.Voltage}" Classes="cellText" />
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="3" Classes="cell">
+                        <TextBlock Text="{Binding T2.OilTemperature}" Classes="cellText" />
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="4" Classes="cell">
+                        <TextBlock Text="{Binding T2.Pressure}" Classes="cellText" />
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="5" Classes="cell">
+                        <TextBlock Text="{Binding T2.Power}" Classes="cellText" />
+                    </Border>
+
+                    <!-- Выход -->
+                    <Border Grid.Row="3" Grid.Column="0" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                        <TextBlock Text="Выход (сумма)" Classes="cellText" FontWeight="SemiBold" />
+                    </Border>
+                    <Border Grid.Row="3" Grid.Column="1" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+                    <Border Grid.Row="3" Grid.Column="2" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+                    <Border Grid.Row="3" Grid.Column="3" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                        <TextBlock Text="{Binding AvgTemperature}" Classes="cellText" FontWeight="Bold"
+                                   Foreground="DodgerBlue" />
+                    </Border>
+                    <Border Grid.Row="3" Grid.Column="4" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+                    <Border Grid.Row="3" Grid.Column="5" Classes="cell"
+                            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                        <TextBlock Text="{Binding TotalPower}" Classes="cellText" FontWeight="Bold"
+                                   Foreground="DodgerBlue" />
+                    </Border>
+
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

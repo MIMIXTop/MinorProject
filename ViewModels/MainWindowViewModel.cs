@@ -1,21 +1,46 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Avalonia;
+using Avalonia.Styling;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MinorProject.Models;
 
 namespace MinorProject.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    // Вью-модель для вкладки Т1
     public TemplatePageTViewModel InfoT1Vm { get; }
-    
-    // Вью-модель для Главной таблицы
+    public TemplatePageTViewModel InfoT2Vm { get; }
     public MainViewModel TableVm { get; }
+
+    [ObservableProperty] private string _themeIcon = "🌙";
 
     public MainWindowViewModel()
     {
-        // 1. Создаем двигатель логики Т1 (с ползунком и графиками)
-        InfoT1Vm = new TemplatePageTViewModel();
+        var twin1 = new DigitalTwinModel("T1", "Трансформатор Т1");
+        var twin2 = new DigitalTwinModel("T2", "Трансформатор Т2");
 
-        // 2. Передаем этот ЖЕ двигатель в таблицу, чтобы она брала оттуда цифры
-        TableVm = new MainViewModel(InfoT1Vm);
+        InfoT1Vm = new TemplatePageTViewModel(twin1);
+        InfoT2Vm = new TemplatePageTViewModel(twin2);
+        TableVm = new MainViewModel(InfoT1Vm, InfoT2Vm);
+
+        UpdateThemeIcon();
+    }
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        if (Application.Current is null) return;
+
+        var current = Application.Current.RequestedThemeVariant;
+        Application.Current.RequestedThemeVariant =
+            current == ThemeVariant.Dark ? ThemeVariant.Light : ThemeVariant.Dark;
+
+        UpdateThemeIcon();
+    }
+
+    private void UpdateThemeIcon()
+    {
+        if (Application.Current is null) return;
+        ThemeIcon = Application.Current.RequestedThemeVariant == ThemeVariant.Dark ? "☀" : "🌙";
     }
 }
