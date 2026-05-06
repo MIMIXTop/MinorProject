@@ -29,6 +29,7 @@ env:
   PROJECT_PATH: "MinorProject.csproj"
   ARTIFACT_NAME: "MinorProject-win-x64"
   PUBLISH_DIR: "publish/win-x64"
+  DEFAULT_RELEASE_TAG: "v1.0.0"
 
 jobs:
   build-windows:
@@ -77,7 +78,7 @@ jobs:
     name: Create GitHub Release
     runs-on: windows-latest
     needs: build-windows
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master'
 
     steps:
       - name: Checkout
@@ -104,18 +105,35 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git tag -a $tag -m "Release $tag"
             git push origin $tag
+            $createRelease = "true"
+          } elseif ("${{ github.ref }}" -eq "refs/heads/master") {
+            $tag = "$env:DEFAULT_RELEASE_TAG"
+            git fetch --tags
+            if (git rev-parse -q --verify "refs/tags/$tag") {
+              $createRelease = "false"
+            } else {
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git tag -a $tag -m "Release $tag"
+              git push origin $tag
+              $createRelease = "false"
+            }
           } else {
             $tag = "${{ github.ref_name }}"
+            $createRelease = "true"
           }
 
           "tag=$tag" >> $env:GITHUB_OUTPUT
+          "create_release=$createRelease" >> $env:GITHUB_OUTPUT
 
       - name: Download artifact
+        if: steps.release_tag.outputs.create_release == 'true'
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Create release
+        if: steps.release_tag.outputs.create_release == 'true'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
