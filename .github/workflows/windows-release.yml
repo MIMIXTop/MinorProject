@@ -1,0 +1,137 @@
+name: Windows Build and Release
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag, for example v1.0.0"
+        required: true
+        type: string
+      prerelease:
+        description: "Mark GitHub release as prerelease"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  PROJECT_PATH: "MinorProject.csproj"
+  ARTIFACT_NAME: "MinorProject-win-x64"
+  PUBLISH_DIR: "publish/win-x64"
+
+jobs:
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore $env:PROJECT_PATH
+
+      - name: Build
+        run: dotnet build $env:PROJECT_PATH --configuration Release --no-restore
+
+      - name: Publish win-x64
+        run: >
+          dotnet publish $env:PROJECT_PATH
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          --output $env:PUBLISH_DIR
+
+      - name: Package artifact
+        run: Compress-Archive -Path "$env:PUBLISH_DIR/*" -DestinationPath "$env:ARTIFACT_NAME.zip" -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_NAME }}.zip
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    runs-on: windows-latest
+    needs: build-windows
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release tag
+        id: release_tag
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $tag = "${{ inputs.version }}".Trim()
+            if ($tag -notmatch '^v\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$') {
+              throw "Version must look like v1.0.0"
+            }
+
+            git fetch --tags
+            if (git rev-parse -q --verify "refs/tags/$tag") {
+              throw "Tag $tag already exists"
+            }
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a $tag -m "Release $tag"
+            git push origin $tag
+          } else {
+            $tag = "${{ github.ref_name }}"
+          }
+
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+
+      - name: Create release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
+          PRERELEASE: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease || false }}
+        run: |
+          $ghArgs = @(
+            "release", "create", $env:RELEASE_TAG,
+            "$env:ARTIFACT_NAME.zip",
+            "--repo", "${{ github.repository }}",
+            "--title", $env:RELEASE_TAG,
+            "--notes", "Windows x64 self-contained build."
+          )
+
+          if ($env:PRERELEASE -eq "true") {
+            $ghArgs += "--prerelease"
+          }
+
+          gh @ghArgs
