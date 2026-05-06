@@ -110,13 +110,13 @@ jobs:
             $tag = "$env:DEFAULT_RELEASE_TAG"
             git fetch --tags
             if (git rev-parse -q --verify "refs/tags/$tag") {
-              $createRelease = "false"
+              $createRelease = "true"
             } else {
               git config user.name "github-actions[bot]"
               git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
               git tag -a $tag -m "Release $tag"
               git push origin $tag
-              $createRelease = "false"
+              $createRelease = "true"
             }
           } else {
             $tag = "${{ github.ref_name }}"
@@ -140,6 +140,12 @@ jobs:
           RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
           PRERELEASE: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease || false }}
         run: |
+          gh release view $env:RELEASE_TAG --repo "${{ github.repository }}" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Release $env:RELEASE_TAG already exists."
+            exit 0
+          }
+
           $ghArgs = @(
             "release", "create", $env:RELEASE_TAG,
             "$env:ARTIFACT_NAME.zip",
